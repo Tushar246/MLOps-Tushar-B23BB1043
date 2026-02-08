@@ -1,0 +1,119 @@
+#  Ride-Share DATA CONTRACT 
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+dataContractSpecification: 0.9.3
+id: urn:datacontract:citymove:rides
+version: 1.0.0
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# 1. OWNERSHIP & GOVERNANCE
+# ───────────────────────────────────────────────────────────────────────────
+info:
+  title: "citymove ride events"
+  description: |
+    completed ride records from the citymove platform.
+    used by the machine learning team.
+  owner: "data engineer team"
+  contact:
+    name: "data engineer team"
+    email: "[dataengineerteam@citymove.com]"
+    slack: "#data-platform"
+  classification: confidential
+  tags: [rideshare , pricing , ml , pii]
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# 2. SCHEMA DEFINITION (Logical Contract)
+# Define the LOGICAL interface, not the PHYSICAL storage.
+# Use business-friendly names, not database abbreviations.
+# ───────────────────────────────────────────────────────────────────────────
+schema:
+  type: object
+  properties:
+    
+    # Example: Standard Identifier
+    ride_id:
+      type: string
+      description: "unique id for a ride - foriegn key"
+      pii: false
+      # physical_mapping: r_id
+    
+    # Example: Numeric Metric with Constraints
+    pickup_timestamp:
+      type: string
+      format: date-time
+      description: "timestamp when the ride started"
+      pii: false
+      # physical_mapping: ts_start
+    
+    # Example: Categorical Data (Enum)
+    passenger_id:
+      type: integer
+      description: "unique passenger identifier"
+      pii: true
+      # physical_mapping: pax_id
+
+    driver_rating:
+      type: number
+      minimum: 1.0
+      maximum: 5.0
+      description: "driver rating on a 1.0–5.0 scale"
+      pii: false
+      # physical_mapping: d_rating
+
+    fare_usd:
+      type: number
+      minimum: 0
+      description: "final ride fare in USD"
+      pii: false
+      # physical_mapping: fare_final
+
+    distance_meters:
+      type: number
+      description: "distance traveled during the ride (meters)"
+      pii: false
+      # physical_mapping: dist_m
+    
+  required: 
+    - ride_id
+    - pickup_timestamp
+    - passenger_id
+    - driver_rating
+    - fare_usd
+    - distance_meters
+
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# 3. SERVICE LEVEL AGREEMENTS (SLAs)
+# ───────────────────────────────────────────────────────────────────────────
+sla:
+  freshness:
+    threshold: "30 minutes"
+    description: "data available within 30 minutes of ride completion"
+  
+
+# ───────────────────────────────────────────────────────────────────────────
+# 4. DATA QUALITY RULES
+# Executable rules to validate data expectations.
+# ───────────────────────────────────────────────────────────────────────────
+quality:
+  - name: fare_non_negative
+    type: validity
+    expression: "fare_usd >= 0"
+    threshold: "100%"
+    enforcement: hard
+
+  - name: driver_rating_valid_range
+    type: validity
+    expression: "driver_rating >= 1.0 AND driver_rating <= 5.0"
+    threshold: "100%"
+    enforcement: hard
+
+  - name: distance_not_null
+    type: completeness
+    column: distance_meters
+    threshold: "100%"
+    enforcement: hard

@@ -1,0 +1,63 @@
+#
+# DATA CONTRACT: Smart Thermostat Telemetry
+#
+
+dataContractSpecification: 0.9.3
+id: urn:datacontract:iot:thermostat
+version: 1.0.0
+
+# ───────────────────────────────────────────────────────────────────────────
+# 1. OWNERSHIP & GOVERNANCE
+# ───────────────────────────────────────────────────────────────────────────
+info:
+  title: "smart thermostat telemetry"
+  description: "temperature and battery data from thermostat fleet"
+  owner: "IoT platform team"
+  classification: internal
+  tags: [iot, sensors, temperature]
+
+# ───────────────────────────────────────────────────────────────────────────
+# 2. SCHEMA DEFINITION (Logical Contract)
+# Define the LOGICAL interface, not the PHYSICAL storage.
+# Use business-friendly names, not database abbreviations.
+# ───────────────────────────────────────────────────────────────────────────
+schema:
+  type: object
+  properties:
+
+    device_id:
+      type: string
+      description: "unique thermostat identifier"
+      # physical_mapping: dev_id
+
+    temperature_celsius:
+      type: number
+      description: "measured temperature in Celsius"
+      # physical_mapping: temp_c
+
+    battery_level:
+      type: number
+      description: "battery level (0.0–1.0)"
+      # physical_mapping: batt_lvl
+
+  required:
+    - device_id
+    - temperature_celsius
+    - battery_level
+
+# ───────────────────────────────────────────────────────────────────────────
+# 4. DATA QUALITY RULES
+# Executable rules to validate data expectations.
+# ───────────────────────────────────────────────────────────────────────────
+quality:
+  - name: temperature_valid_range
+    type: validity
+    expression: "temperature_celsius >= -30 AND temperature_celsius <= 60"
+    threshold: "100%"
+    enforcement: hard
+
+  - name: battery_level_valid_range
+    type: validity
+    expression: "battery_level >= 0.0 AND battery_level <= 1.0"
+    threshold: "100%"
+    enforcement: hard

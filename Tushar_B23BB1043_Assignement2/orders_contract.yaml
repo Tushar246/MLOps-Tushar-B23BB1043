@@ -1,0 +1,64 @@
+# DATA CONTRACT : flash sale orders stream
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+dataContractSpecification: 0.9.3
+id: urn:datacontract:ecommerce:orders
+version: 1.0.0
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# 1. OWNERSHIP & GOVERNANCE
+# ───────────────────────────────────────────────────────────────────────────
+info:
+  title: "flash sale orders"
+  description: "real-time orders feed for marketing dashboards"
+  owner: "e-commerce data team"
+  classification: internal
+  tags: [ecommerce, orders, realtime]
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# 2. SCHEMA DEFINITION (Logical Contract)
+# Define the LOGICAL interface, not the PHYSICAL storage.
+# Use business-friendly names, not database abbreviations.
+# ───────────────────────────────────────────────────────────────────────────
+schema:
+  type: object
+  properties:
+    
+    # Example: Standard Identifier
+    order_total_usd:
+      type: number
+      minimum: 0
+      description: "total order value in USD"
+      # physical_mapping: o_total
+
+    status:
+      type: string
+      enum: [PAID, SHIPPED, CANCELLED]
+      description: |
+        logical order status.
+        mapped from codes: 2=PAID, 5=SHIPPED, 9=CANCELLED
+      # physical_mapping: status_code
+
+  required:
+    - order_total_usd
+    - status
+
+# ───────────────────────────────────────────────────────────────────────────
+# 4. DATA QUALITY RULES
+# Executable rules to validate data expectations.
+# ───────────────────────────────────────────────────────────────────────────
+quality:
+  -name: order_total_non_negative
+    type: validity
+    expression: "order_total_usd >= 0"
+    threshold: "100%"
+    enforcement: hard
+
+  - name: valid_status_code
+    type: validity
+    expression: "status IN ('PAID', 'SHIPPED', 'CANCELLED')"
+    threshold: "100%"
+    enforcement: hard

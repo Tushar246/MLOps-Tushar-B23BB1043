@@ -1,0 +1,58 @@
+# DATA CONTRACT: Financial Transactions Log
+
+
+
+dataContractSpecification: 0.9.3
+id: urn:datacontract:fintech:transactions
+version: 1.0.0
+
+# ───────────────────────────────────────────────────────────────────────────
+# 1. OWNERSHIP & GOVERNANCE
+# ───────────────────────────────────────────────────────────────────────────
+info:
+  title: "transaction Log"
+  description: "financial transactions for fraud detection"
+  owner: "bank data engineering"
+  classification: restricted
+  tags: [fintech, fraud, transactions]
+
+# ───────────────────────────────────────────────────────────────────────────
+# 2. SCHEMA DEFINITION (Logical Contract)
+# Define the LOGICAL interface, not the PHYSICAL storage.
+# Use business-friendly names, not database abbreviations.
+# ───────────────────────────────────────────────────────────────────────────
+schema:
+  type: object
+  properties:
+
+    account_source_id:
+      type: string
+      description: "source account identifier (10-char uppercase alphanumeric)"
+      # physical_mapping: acct_src
+
+    account_destination_id:
+      type: string
+      description: "destination account identifier"
+      # physical_mapping: acct_dest
+
+    transaction_timestamp:
+      type: string
+      format: date-time
+      description: "transaction timestamp"
+      # physical_mapping: tx_ts
+
+  required:
+    - account_source_id
+    - account_destination_id
+    - transaction_timestamp
+
+# ───────────────────────────────────────────────────────────────────────────
+# 4. DATA QUALITY RULES
+# Executable rules to validate data expectations.
+# ───────────────────────────────────────────────────────────────────────────
+quality:
+  - name: account_source_id_format
+    type: validity
+    expression: "REGEXP_LIKE(account_source_id, '^[A-Z0-9]{10}$')"
+    threshold: "100%"
+    enforcement: hard
