@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pt
+*.bin
+*.ckpt
+*.pkl
+*.h5
+*.zip
+*.tar
+data/
+.ipynb_checkpoints/
